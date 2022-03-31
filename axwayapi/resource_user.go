@@ -14,7 +14,7 @@ var TFUserSchema = schemaMap{
 	"name":       required(_string()),
 	"email":      required(_string()),
 	"enabled":    required(_bool()),
-	"main_role": required(_listExact(1,
+	"main_role": required(_singleton(
 		&schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"org_id": required(_string()),

@@ -398,9 +398,9 @@ func expandConfig(tfconfig *schema.ResourceData, axconfig *client.Config, full b
 	if full || tfconfig.HasChange("is_api_portal_configured") {
 		axconfig.IsApiPortalConfigured = tfconfig.Get("is_api_portal_configured").(bool)
 	}
-	if full || tfconfig.HasChange("change_password_on_first_login") {
-		axconfig.ChangePasswordOnFirstLogin = tfconfig.Get("change_password_on_first_login").(bool)
-	}
+
+	axconfig.ChangePasswordOnFirstLogin = tfconfig.Get("change_password_on_first_login").(bool)
+
 	if full || tfconfig.HasChange("session_timeout_millis") {
 		axconfig.SessionTimeout = tfconfig.Get("session_timeout_millis").(int)
 	}

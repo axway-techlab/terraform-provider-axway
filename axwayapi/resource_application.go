@@ -29,7 +29,7 @@ var TFApplicationSchema = &schemaMap{
 	"created_on": readonly(_int()),
 	"apis":       desc(optional(_plist(schema.TypeString)), "A list of APIs that this application can reach"),
 	"apikey":     desc(optional(_list(TFApiKey)), "The API keys this application holds"),
-	"quota": desc(optional(_listExact(1, &schema.Resource{
+	"quota": desc(optional(_singleton(&schema.Resource{
 		Schema: TFQuotaSchema,
 	})), "Overrides the default quota for applications, if any"),
 }

@@ -13,6 +13,10 @@ import (
 
 type schemaMap map[string]*schema.Schema
 
+func resource(s schemaMap) *schema.Resource {
+	return &schema.Resource{Schema: s}
+}
+
 //--
 func inOut(schema *schema.Schema) *schema.Schema {
 	schema.Required = false
@@ -26,7 +30,21 @@ func required(schema *schema.Schema) *schema.Schema {
 	schema.Computed = false
 	return schema
 }
-func optional(schema *schema.Schema, defValue... interface{}) *schema.Schema {
+func exactlyOneOfResource(schema *schema.Schema, choices ...string) *schema.Schema {
+	schema.Required = false
+	schema.Optional = true
+	schema.Computed = false
+	schema.ExactlyOneOf = choices
+	return schema
+}
+func atLeastOneOfResource(schema *schema.Schema, choices ...string) *schema.Schema {
+	schema.Required = false
+	schema.Optional = true
+	schema.Computed = false
+	schema.AtLeastOneOf = choices
+	return schema
+}
+func optional(schema *schema.Schema, defValue ...interface{}) *schema.Schema {
 	schema.Required = false
 	schema.Optional = true
 	schema.Computed = false
@@ -171,7 +189,6 @@ func _setBounded(min, max int, s *schema.Resource) *schema.Schema {
 	return &schema.Schema{Type: schema.TypeSet, MinItems: min, MaxItems: max, Elem: s}
 }
 
-
 //--
 func _list(s *schema.Resource) *schema.Schema {
 	return &schema.Schema{Type: schema.TypeList, Elem: s}
@@ -187,6 +204,9 @@ func _listBounded(min, max int, s *schema.Resource) *schema.Schema {
 }
 func _listExact(nb int, s *schema.Resource) *schema.Schema {
 	return &schema.Schema{Type: schema.TypeList, MinItems: nb, MaxItems: nb, Elem: s}
+}
+func _singleton(s *schema.Resource) *schema.Schema {
+	return _listExact(1, s)
 }
 
 //-- avoiding generics for the nonce
@@ -213,7 +233,7 @@ func _namedMap(s *schema.Resource) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: schemaMap{
 				"name":  required(_string()),
-				"value": required(_listExact(1, s)),
+				"value": required(_singleton(s)),
 			},
 		},
 	}
@@ -242,4 +262,3 @@ func _hash(v interface{}) string {
 	}
 	return ""
 }
-

@@ -75,6 +75,9 @@ var TFInboudProfile = &schema.Resource{
 		"monitor_api":      inOut(_bool()),
 		"monitor_subject":  inOut(_string()),
 	},
+	ReadContext: func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics {
+		panic("reading")
+	},
 }
 
 var TFOutboundProfile = &schema.Resource{
@@ -366,29 +369,6 @@ func flattenCorsProfiles(c []client.CorsProfile) []flattenMap {
 	}
 	return r
 }
-func flattenSecurityProfiles(c []client.SecurityProfile) []flattenMap {
-	r := make([]flattenMap, len(c))
-	for i, a := range c {
-		r[i] = flattenMap{
-			"name":       a.Name,                    //required(_string())
-			"is_default": a.IsDefault,               //required(_bool())
-			"devices":    flattenDevices(a.Devices), // inOut(_listMin(1, TFDevice)),
-		}
-	}
-	return r
-}
-func flattenDevices(c []client.Device) []flattenMap {
-	r := make([]flattenMap, len(c))
-	for i, a := range c {
-		r[i] = flattenMap{
-			"name":  a.Name,  //required(inOut(_string()))
-			"type":  a.Type,  //required(inOut(_string()))
-			"order": a.Order, //required(inOut(_int()))
-			/**/ "properties": a.Properties, //required(_map(schema.TypeString)),
-		}
-	}
-	return r
-}
 
 func flattenAuthenticationProfiles(c []client.AuthenticationProfile) []flattenMap {
 	r := make([]flattenMap, len(c))
@@ -565,30 +545,6 @@ func expandCorsProfiles(v interface{}) []client.CorsProfile {
 		r[i].ExposedHeaders = toStringArray(a["exposed_headers"]) //required(_plist(schema.TypeString))
 		r[i].SupportCredentials = a["support_credentials"].(bool) //required(_bool())
 		r[i].MaxAgeSeconds = a["max_age_seconds"].(int)           //inOut(_int())
-	}
-	return r
-}
-
-func expandSecurityProfiles(v interface{}) []client.SecurityProfile {
-	c := v.([]interface{})
-	r := make([]client.SecurityProfile, len(c))
-	for i, b := range c {
-		a := b.(map[string]interface{})
-		r[i].Name = a["name"].(string)             //required(_string())
-		r[i].IsDefault = a["is_default"].(bool)    //required(_bool())
-		r[i].Devices = expandDevices(a["devices"]) // inOut(_listMin(1, TFDevice)),
-	}
-	return r
-}
-func expandDevices(v interface{}) []client.Device {
-	c := v.([]interface{})
-	r := make([]client.Device, len(c))
-	for i, b := range c {
-		a := b.(map[string]interface{})
-		r[i].Name = a["name"].(string) //required(inOut(_string()))
-		r[i].Type = a["type"].(string) //required(inOut(_string()))
-		r[i].Order = a["order"].(int)  //required(inOut(_int()))
-		/**/ r[i].Properties = a["properties"].(flattenMap) //required(_map(schema.TypeString)),
 	}
 	return r
 }
