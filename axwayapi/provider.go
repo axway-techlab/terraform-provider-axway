@@ -3,6 +3,7 @@ package axwayapi
 import (
 	"context"
 	"net/url"
+	"time"
 
 	"github.com/axway-techlab/axwayapi_client/axwayapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -56,8 +57,28 @@ func Provider() *schema.Provider {
 }
 
 type ProviderState struct {
-	Client *axwayapi.Client
-	Cache  map[string]interface{}
+	Client           *axwayapi.Client
+	host             string
+	username         string
+	password         string
+	proxy            *url.URL
+	skipTlsCertVerif bool
+}
+
+func (prov *ProviderState) GetClient() (*axwayapi.Client, error) {
+	if prov.Client != nil {
+		return prov.Client, nil
+	}
+	c, err := axwayapi.NewClient(prov.host, prov.username, prov.password, prov.proxy, prov.skipTlsCertVerif)
+	if err != nil {
+		return nil, err
+	}
+	err = c.WaitForReadiness(5 * time.Minute)
+	if err != nil {
+		return nil, err
+	}
+	prov.Client = c
+	return c, nil
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -84,18 +105,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	host := d.Get("host").(string)
 
 	if (username != "") && (password != "") {
-		c, err := axwayapi.NewClient(host, username, password, proxy, skipTlsCertVerif)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to create axwayapi client",
-				Detail:   "Unable to authenticate user for authenticated axwayapi client",
-			})
-
-			return nil, diags
-		}
-
-		return &ProviderState{c, make(map[string]interface{}, 10)}, diags
+		return &ProviderState{nil, host, username, password, proxy, skipTlsCertVerif}, diags
 	} else {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

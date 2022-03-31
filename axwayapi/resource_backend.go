@@ -41,7 +41,10 @@ func resourceBackend() *schema.Resource {
 }
 
 func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	orgId := d.Get("org_id").(string)
 	name := d.Get("name").(string)
 	file := d.Get("swagger").(string)
@@ -74,7 +77,10 @@ func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceBackendRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	backend, err := c.GetBackend(d.Id())
 	if err != nil {
@@ -87,12 +93,15 @@ func resourceBackendRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceBackendUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	backend := &client.Backend{}
 	expandBackend(d, backend)
 
-	err := c.UpdateBackend(backend)
+	err = c.UpdateBackend(backend)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -103,9 +112,12 @@ func resourceBackendUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceBackendDelete(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := c.DeleteBackend(d.Id())
+	err = c.DeleteBackend(d.Id())
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags

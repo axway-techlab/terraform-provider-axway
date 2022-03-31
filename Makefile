@@ -1,9 +1,9 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=axway.com
-NAMESPACE=axway-techlabs
+HOSTNAME=registry.terraform.io
+NAMESPACE=axway-techlab
 NAME=axwayapi
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
+VERSION=0.1.1
 OS_ARCH=darwin_amd64
 GC_FLAGS="all=-N -l"
 

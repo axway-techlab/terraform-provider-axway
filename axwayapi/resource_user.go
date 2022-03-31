@@ -44,13 +44,16 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	user := &client.User{}
 
 	expandUser(d, user)
 
-	err := c.CreateUser(user)
+	err = c.CreateUser(user)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -75,7 +78,10 @@ func syncPassword(d *schema.ResourceData, user *client.User, c *client.Client) (
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	user, err := c.GetUser(d.Id())
 	if err != nil {
@@ -88,11 +94,14 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	user := &client.User{}
 	expandUser(d, user)
-	err := c.UpdateUser(user)
+	err = c.UpdateUser(user)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -107,9 +116,12 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := c.DeleteUser(d.Id())
+	err = c.DeleteUser(d.Id())
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags

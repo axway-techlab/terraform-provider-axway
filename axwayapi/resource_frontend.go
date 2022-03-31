@@ -141,12 +141,15 @@ func resourceFrontend() *schema.Resource {
 }
 
 func resourceFrontendCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	frontend := &client.Frontend{}
 	expandFrontendForCreate(d, frontend)
 
-	err := c.CreateFrontend(frontend)
+	err = c.CreateFrontend(frontend)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -159,7 +162,10 @@ func resourceFrontendCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceFrontendRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	frontend, err := c.GetFrontend(d.Id())
 	if err != nil {
@@ -175,8 +181,10 @@ func resourceFrontendRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceFrontendUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
-	var err error
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	sis, swant := d.GetChange("state")
 	// we must unpublish if the api is
@@ -287,7 +295,10 @@ func adaptStates(c *client.Client, d *schema.ResourceData, state string, fronten
 	return diags
 }
 func resourceFrontendDelete(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("state") != unpublished {
 		// unpublish the frontend prior to deletion
@@ -296,7 +307,7 @@ func resourceFrontendDelete(ctx context.Context, d *schema.ResourceData, m inter
 		c.UnpublishFrontend(frontend)
 	}
 
-	err := c.DeleteFrontend(d.Id())
+	err = c.DeleteFrontend(d.Id())
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -334,7 +345,7 @@ func flattenFrontend(c *client.Frontend, d *schema.ResourceData) {
 	d.Set("outbound_profile", flattenOutboundProfiles(c.OutboundProfiles))                   //inOut(_namedMap(TFOutboundProfile))
 	d.Set("service_profile", flattenServiceProfiles(c.ServiceProfiles))                      //inOut(_namedMap(TFServiceProfile))
 	d.Set("ca_cert", flattenCACerts(c.CACerts))                                              //inOut(_list(TFCACert))
-	d.Set("tag", flattenTags(c.Tags))                                                       //inOut(_pnamedMap(_plist(schema.TypeString)))
+	d.Set("tag", flattenTags(c.Tags))                                                        //inOut(_pnamedMap(_plist(schema.TypeString)))
 	d.Set("custom_properties", c.CustomProperties)                                           //inOut(_map(schema.TypeString)),
 	d.Set("created_by", c.CreatedBy)                                                         //inOut(_string())
 	d.Set("created_on", c.CreatedOn)                                                         //inOut(_int())

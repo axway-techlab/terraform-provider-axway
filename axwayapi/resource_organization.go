@@ -38,11 +38,14 @@ func resourceOrganization() *schema.Resource {
 }
 
 func resourceOrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	org := &client.Org{}
 	expandOrg(d, org)
-	err := c.CreateOrg(org)
+	err = c.CreateOrg(org)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -55,7 +58,10 @@ func resourceOrgCreate(ctx context.Context, d *schema.ResourceData, m interface{
 }
 
 func resourceOrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	org, err := c.GetOrg(d.Id())
 	if err != nil {
@@ -69,11 +75,14 @@ func resourceOrgRead(ctx context.Context, d *schema.ResourceData, m interface{})
 }
 
 func resourceOrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	org := &client.Org{}
 	expandOrg(d, org)
-	err := c.UpdateOrg(org)
+	err = c.UpdateOrg(org)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -87,9 +96,12 @@ func resourceOrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 }
 
 func resourceOrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := c.DeleteOrg(d.Id())
+	err = c.DeleteOrg(d.Id())
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags

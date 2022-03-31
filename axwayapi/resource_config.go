@@ -101,7 +101,10 @@ func resourceConfig() *schema.Resource {
 }
 
 func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// read config from API Gateway
 	config, err := c.GetConfig()
@@ -129,7 +132,10 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Read conf from server
 	config, err := c.GetConfig()
@@ -174,14 +180,17 @@ func flattenQuota(quota *client.Quota) []flattenMap {
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Start from blank config object
 	config := &client.Config{}
 	// forcibly apply our state onto that object
 	expandConfig(d, config, true)
 	// update the server with this new state
-	err := c.UpdateConfig(config)
+	err = c.UpdateConfig(config)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags

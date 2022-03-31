@@ -56,12 +56,15 @@ func resourceApplication() *schema.Resource {
 }
 
 func resourceApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	application := &client.Application{}
 	expandApplication(d, application)
 
-	err := c.CreateApplication(application)
+	err = c.CreateApplication(application)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -78,7 +81,10 @@ func resourceApplicationCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	application, err := c.GetApplication(d.Id())
 	if err != nil {
@@ -91,12 +97,15 @@ func resourceApplicationRead(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceApplicationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	application := &client.Application{}
 	expandApplication(d, application)
 
-	err := c.UpdateApplication(application)
+	err = c.UpdateApplication(application)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
@@ -113,9 +122,12 @@ func resourceApplicationUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) (diags diag.Diagnostics) {
-	c := m.(*ProviderState).Client
+	c, err := m.(*ProviderState).GetClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := c.DeleteApplication(d.Id())
+	err = c.DeleteApplication(d.Id())
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
