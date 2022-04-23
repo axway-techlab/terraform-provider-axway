@@ -6,17 +6,16 @@ build:
 	make -C .. install
 
 clean:
-	rm -rf .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
-	rm -rf .terraform
+	rm -rf terraform.tfstate terraform.tfstate.backup
 
 init: build
 	terraform init
 
 apply:  build
-	terraform apply -auto-approve
+	terraform apply
 
 destroy:  build
-	terraform destroy -auto-approve
+	terraform destroy
 
 plan: build
 	terraform plan

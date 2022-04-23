@@ -59,7 +59,7 @@ var TFConfigSchema = schemaMap{
 	"strict_certificate_checking":         inOut(_bool()),
 	"system_o_auth_scopes_enabled":        inOut(_bool()),
 	"user_name_regex":                     inOut(_string()),
-	"lock_user_account": inOut(_listMax(1, &schema.Resource{
+	"lock_user_account": inOut(_listExact(1, &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"enabled":               inOut(_bool()),
 			"attempts":              inOut(_int()),
@@ -308,7 +308,6 @@ func flattenConfig(axconfig *client.Config, d *schema.ResourceData) {
 	d.Set("password_lifetime_days", axconfig.PasswordLifetimeDays)
 	d.Set("delegate_user_administration", axconfig.DelegateUserAdministration)
 	d.Set("portal_hostname", axconfig.PortalHostname)
-
 	d.Set("lock_user_account", flattenLua(&axconfig.LockUserAccount))
 }
 
@@ -320,178 +319,175 @@ func flattenLua(lua *client.LockUserAccount) (res []map[string]interface{}) {
 	data["lock_time_period_unit"] = lua.LockTimePeriodUnit
 	data["time_period"] = lua.TimePeriod
 	data["time_period_unit"] = lua.TimePeriodUnit
-	res = append(res, data)
-	return res
+	return append(res, data)
 }
 
 // Tedious but much easier to maintain and understand...
-func expandConfig(tfconfig *schema.ResourceData, axconfig *client.Config, full bool) (msg string) {
-	if full || tfconfig.HasChange("registration_enabled") {
+func expandConfig(tfconfig *schema.ResourceData, axconfig *client.Config, full bool) {
+	raw := tfconfig.GetRawConfig().AsValueMap()
+	if full || !raw["registration_enabled"].IsNull() {
 		axconfig.RegistrationEnabled = tfconfig.Get("registration_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("reg_token_email_enabled") {
+	if full || !raw["reg_token_email_enabled"].IsNull() {
 		axconfig.RegTokenEmailEnabled = tfconfig.Get("reg_token_email_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("api_import_timeout") {
+	if full || !raw["api_import_timeout"].IsNull() {
 		axconfig.ApiImportTimeout = tfconfig.Get("api_import_timeout").(int)
 	}
-	if full || tfconfig.HasChange("is_trial") {
+	if full || !raw["is_trial"].IsNull() {
 		axconfig.IsTrial = tfconfig.Get("is_trial").(bool)
 	}
-	if full || tfconfig.HasChange("promote_api_via_policy") {
+	if full || !raw["promote_api_via_policy"].IsNull() {
 		axconfig.PromoteApiViaPolicy = tfconfig.Get("promote_api_via_policy").(bool)
 	}
-	if full || tfconfig.HasChange("system_o_auth_scopes_enabled") {
+	if full || !raw["system_o_auth_scopes_enabled"].IsNull() {
 		axconfig.SystemOAuthScopesEnabled = tfconfig.Get("system_o_auth_scopes_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("oadmin_self_service_enabled") {
+	if full || !raw["oadmin_self_service_enabled"].IsNull() {
 		axconfig.OadminSelfServiceEnabled = tfconfig.Get("oadmin_self_service_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("product_version") {
+	if full || !raw["product_version"].IsNull() {
 		axconfig.ProductVersion = tfconfig.Get("product_version").(string)
 	}
-	if full || tfconfig.HasChange("portal_name") {
+	if full || !raw["portal_name"].IsNull() {
 		axconfig.PortalName = tfconfig.Get("portal_name").(string)
 	}
-	if full || tfconfig.HasChange("global_response_policy") {
+	if full || !raw["global_response_policy"].IsNull() {
 		axconfig.GlobalResponsePolicy = tfconfig.Get("global_response_policy").(string)
 	}
-	if full || tfconfig.HasChange("auto_approve_applications") {
+	if full || !raw["auto_approve_applications"].IsNull() {
 		axconfig.AutoApproveApplications = tfconfig.Get("auto_approve_applications").(bool)
 	}
-	if full || tfconfig.HasChange("global_request_policy") {
+	if full || !raw["global_request_policy"].IsNull() {
 		axconfig.GlobalRequestPolicy = tfconfig.Get("global_request_policy").(string)
 	}
-	if full || tfconfig.HasChange("auto_approve_user_registration") {
+	if full || !raw["auto_approve_user_registration"].IsNull() {
 		axconfig.AutoApproveUserRegistration = tfconfig.Get("auto_approve_user_registration").(bool)
 	}
-	if full || tfconfig.HasChange("delegate_application_administration") {
+	if full || !raw["delegate_application_administration"].IsNull() {
 		axconfig.DelegateApplicationAdministration = tfconfig.Get("delegate_application_administration").(bool)
 	}
-	if full || tfconfig.HasChange("api_default_virtual_host") {
+	if full || !raw["api_default_virtual_host"].IsNull() {
 		axconfig.ApiDefaultVirtualHost = tfconfig.Get("api_default_virtual_host").(string)
 	}
-	if full || tfconfig.HasChange("api_routing_key_location") {
+	if full || !raw["api_routing_key_location"].IsNull() {
 		axconfig.ApiRoutingKeyLocation = tfconfig.Get("api_routing_key_location").(string)
 	}
-	if full || tfconfig.HasChange("application_scope_restrictions") {
+	if full || !raw["application_scope_restrictions"].IsNull() {
 		axconfig.ApplicationScopeRestrictions = tfconfig.Get("application_scope_restrictions").(bool)
 	}
-	if full || tfconfig.HasChange("base_o_auth") {
+	if full || !raw["base_o_auth"].IsNull() {
 		axconfig.BaseOAuth = tfconfig.Get("base_o_auth").(bool)
 	}
-	if full || tfconfig.HasChange("email_bounce_address") {
+	if full || !raw["email_bounce_address"].IsNull() {
 		axconfig.EmailBounceAddress = tfconfig.Get("email_bounce_address").(string)
 	}
-	if full || tfconfig.HasChange("advisory_banner_enabled") {
+	if full || !raw["advisory_banner_enabled"].IsNull() {
 		axconfig.AdvisoryBannerEnabled = tfconfig.Get("advisory_banner_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("user_name_regex") {
+	if full || !raw["user_name_regex"].IsNull() {
 		axconfig.UserNameRegex = tfconfig.Get("user_name_regex").(string)
 	}
-	if full || tfconfig.HasChange("api_import_mime_validation") {
+	if full || !raw["api_import_mime_validation"].IsNull() {
 		axconfig.ApiImportMimeValidation = tfconfig.Get("api_import_mime_validation").(bool)
 	}
-	if full || tfconfig.HasChange("session_idle_timeout_millis") {
+	if full || !raw["session_idle_timeout_millis"].IsNull() {
 		axconfig.SessionIdleTimeout = tfconfig.Get("session_idle_timeout_millis").(int)
 	}
-	if full || tfconfig.HasChange("is_api_portal_configured") {
+	if full || !raw["is_api_portal_configured"].IsNull() {
 		axconfig.IsApiPortalConfigured = tfconfig.Get("is_api_portal_configured").(bool)
 	}
-
-	axconfig.ChangePasswordOnFirstLogin = tfconfig.Get("change_password_on_first_login").(bool)
-
-	if full || tfconfig.HasChange("session_timeout_millis") {
+	if full || !raw["change_password_on_first_login"].IsNull() {
+		axconfig.ChangePasswordOnFirstLogin = tfconfig.Get("change_password_on_first_login").(bool)
+	}
+	if full || !raw["session_timeout_millis"].IsNull() {
 		axconfig.SessionTimeout = tfconfig.Get("session_timeout_millis").(int)
 	}
-	if full || tfconfig.HasChange("email_from") {
+	if full || !raw["email_from"].IsNull() {
 		axconfig.EmailFrom = tfconfig.Get("email_from").(string)
 	}
-	if full || tfconfig.HasChange("api_routing_key_enabled") {
+	if full || !raw["api_routing_key_enabled"].IsNull() {
 		axconfig.ApiRoutingKeyEnabled = tfconfig.Get("api_routing_key_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("login_response_time") {
+	if full || !raw["login_response_time"].IsNull() {
 		axconfig.LoginResponseTime = tfconfig.Get("login_response_time").(int)
 	}
-	if full || tfconfig.HasChange("server_certificate_verification") {
+	if full || !raw["server_certificate_verification"].IsNull() {
 		axconfig.ServerCertificateVerification = tfconfig.Get("server_certificate_verification").(bool)
 	}
-	if full || tfconfig.HasChange("reset_password_enabled") {
+	if full || !raw["reset_password_enabled"].IsNull() {
 		axconfig.ResetPasswordEnabled = tfconfig.Get("reset_password_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("advisory_banner_text") {
+	if full || !raw["advisory_banner_text"].IsNull() {
 		axconfig.AdvisoryBannerText = tfconfig.Get("advisory_banner_text").(string)
 	}
-	if full || tfconfig.HasChange("api_import_editable") {
+	if full || !raw["api_import_editable"].IsNull() {
 		axconfig.ApiImportEditable = tfconfig.Get("api_import_editable").(bool)
 	}
-	if full || tfconfig.HasChange("api_portal_hostname") {
+	if full || !raw["api_portal_hostname"].IsNull() {
 		axconfig.ApiPortalHostname = tfconfig.Get("api_portal_hostname").(string)
 	}
-	if full || tfconfig.HasChange("api_portal_name") {
+	if full || !raw["api_portal_name"].IsNull() {
 		axconfig.ApiPortalName = tfconfig.Get("api_portal_name").(string)
 	}
-	if full || tfconfig.HasChange("fault_handlers_enabled") {
+	if full || !raw["fault_handlers_enabled"].IsNull() {
 		axconfig.FaultHandlersEnabled = tfconfig.Get("fault_handlers_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("architecture") {
+	if full || !raw["architecture"].IsNull() {
 		axconfig.Architecture = tfconfig.Get("architecture").(string)
 	}
-	if full || tfconfig.HasChange("strict_certificate_checking") {
+	if full || !raw["strict_certificate_checking"].IsNull() {
 		axconfig.StrictCertificateChecking = tfconfig.Get("strict_certificate_checking").(bool)
 	}
-	if full || tfconfig.HasChange("global_policies_enabled") {
+	if full || !raw["global_policies_enabled"].IsNull() {
 		axconfig.GlobalPoliciesEnabled = tfconfig.Get("global_policies_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("minimum_password_length") {
+	if full || !raw["minimum_password_length"].IsNull() {
 		axconfig.MinimumPasswordLength = tfconfig.Get("minimum_password_length").(int)
 	}
-	if full || tfconfig.HasChange("password_expiry_enabled") {
+	if full || !raw["password_expiry_enabled"].IsNull() {
 		axconfig.PasswordExpiryEnabled = tfconfig.Get("password_expiry_enabled").(bool)
 	}
-	if full || tfconfig.HasChange("os") {
+	if full || !raw["os"].IsNull() {
 		axconfig.Os = tfconfig.Get("os").(string)
 	}
-	if full || tfconfig.HasChange("login_name_regex") {
+	if full || !raw["login_name_regex"].IsNull() {
 		axconfig.LoginNameRegex = tfconfig.Get("login_name_regex").(string)
 	}
-	if full || tfconfig.HasChange("default_trial_duration") {
+	if full || !raw["default_trial_duration"].IsNull() {
 		axconfig.DefaultTrialDuration = tfconfig.Get("default_trial_duration").(int)
 	}
-	if full || tfconfig.HasChange("global_fault_handler_policy") {
+	if full || !raw["global_fault_handler_policy"].IsNull() {
 		axconfig.GlobalFaultHandlerPolicy = tfconfig.Get("global_fault_handler_policy").(string)
 	}
-	if full || tfconfig.HasChange("password_lifetime_days") {
+	if full || !raw["password_lifetime_days"].IsNull() {
 		axconfig.PasswordLifetimeDays = tfconfig.Get("password_lifetime_days").(int)
 	}
-	if full || tfconfig.HasChange("delegate_user_administration") {
+	if full || !raw["delegate_user_administration"].IsNull() {
 		axconfig.DelegateUserAdministration = tfconfig.Get("delegate_user_administration").(bool)
 	}
-	if full || tfconfig.HasChange("portal_hostname") {
+	if full || !raw["portal_hostname"].IsNull() {
 		axconfig.PortalHostname = tfconfig.Get("portal_hostname").(string)
 	}
-	if full || tfconfig.HasChange("lock_user_account.0.enabled") {
-		axconfig.LockUserAccount.Enabled = tfconfig.Get("lock_user_account.0.enabled").(bool)
+	if raw["lock_user_account"].LengthInt() > 0 {
+		lua := raw["lock_user_account"].AsValueSlice()[0].AsValueMap()
+		if full || !lua["attempts"].IsNull() {
+			axconfig.LockUserAccount.Enabled = tfconfig.Get("lock_user_account.0.enabled").(bool)
+		}
+		if full || !lua["attempts"].IsNull() {
+			axconfig.LockUserAccount.Attempts = tfconfig.Get("lock_user_account.0.attempts").(int)
+		}
+		if full || !lua["lock_time_period"].IsNull() {
+			axconfig.LockUserAccount.LockTimePeriod = tfconfig.Get("lock_user_account.0.lock_time_period").(int)
+		}
+		if full || !lua["lock_time_period_unit"].IsNull() {
+			axconfig.LockUserAccount.LockTimePeriodUnit = tfconfig.Get("lock_user_account.0.lock_time_period_unit").(string)
+		}
+		if full || !lua["time_period"].IsNull() {
+			axconfig.LockUserAccount.TimePeriod = tfconfig.Get("lock_user_account.0.time_period").(int)
+		}
+		if full || !lua["time_period_unit"].IsNull() {
+			axconfig.LockUserAccount.TimePeriodUnit = tfconfig.Get("lock_user_account.0.time_period_unit").(string)
+		}
 	}
-	if full || tfconfig.HasChange("lock_user_account.0.attempts") {
-		axconfig.LockUserAccount.Attempts = tfconfig.Get("lock_user_account.0.attempts").(int)
-	}
-	if full || tfconfig.HasChange("lock_user_account.0.lock_time_period") {
-		axconfig.LockUserAccount.LockTimePeriod = tfconfig.Get("lock_user_account.0.lock_time_period").(int)
-	}
-	if full || tfconfig.HasChange("lock_user_account.0.lock_time_period_unit") {
-		msg = msg + "changed lock_user_account.0.lock_time_period_unit"
-		axconfig.LockUserAccount.LockTimePeriodUnit = tfconfig.Get("lock_user_account.0.lock_time_period_unit").(string)
-	}
-	if full || tfconfig.HasChange("lock_user_account.0.time_period") {
-		msg = msg + "changed lock_user_account.0.time_period"
-		axconfig.LockUserAccount.TimePeriod = tfconfig.Get("lock_user_account.0.time_period").(int)
-	}
-	if full || tfconfig.HasChange("lock_user_account.0.time_period_unit") {
-		msg = msg + "changed lock_user_account.0.time_period_unit"
-		axconfig.LockUserAccount.TimePeriodUnit = tfconfig.Get("lock_user_account.0.time_period_unit").(string)
-	} else {
-		msg = msg + "NOT changeing lock_user_account.0.time_period_unit"
-	}
-	return msg + fmt.Sprintf("expanded to %v", axconfig)
 }
